@@ -115,12 +115,10 @@ const ProductDetailsScreen = props => {
           </Header>
           <View style={styles.card}>
               <View style={{width:'90%', height:'40%', backgroundColor:'white'}}>
-                  <ImageBackground source={{uri:product.product.image}} style={{width:'100%', height:'100%', justifyContent:'flex-top', alignItems:'center'}}>
+                  <ImageBackground defaultSource={require('../assets/images/images.png')} source={{uri:product.product.image}} style={{width:'100%', height:'100%', justifyContent:'flex-top', alignItems:'center'}}>
 
-                    
                         <Text style={{fontWeight:'bold', fontSize:20, color:'white', backgroundColor:'grey', opacity:0.8}}>{product.product.title}</Text>
-                    
-                        
+                                            
                   </ImageBackground>
 
               </View>
@@ -149,18 +147,7 @@ const ProductDetailsScreen = props => {
                       <Text style={{fontWeight:'bold', fontSize:17, color:'grey'}} >Vegetarian: {product.product.is_vegetarian?<MatIcon size={20} name="check" color="green"/> : <MatIcon size={20} name="close" color="red"/>} </Text>
                       <Text></Text>
                       <Text style={{fontWeight:'bold', fontSize:17, color:'grey'}} >Price:  {product.amount} Frw </Text>
-                      <Text></Text>
-                      {/* <MarqueeText
-                       style={{fontWeight:'bold', fontSize:17, color:'grey'}} 
-                         
-                      duration={9500}
-                       marqueeOnStart
-                        loop
-                        marqueeDelay={5000}
-                        marqueeResetDelay={1000}
-                       >{product.description}</MarqueeText> */}
-                      <Text></Text>
-                      
+                      <Text></Text>                    
 
                   </View>
                   <View style={{justifyContent:'center', alignItems:'center'}}>

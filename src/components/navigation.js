@@ -1,6 +1,4 @@
 import React from 'react'
-import LoginScreen from '../screens/LoginScreen'
-import RegisterScreen from  '../screens/RegisterScreen'
 import Home from '../screens/HomeScreen'
 import Settings from '../screens/SettingsScreen'
 import OrdersScreen from '../screens/OrdersScreen'
@@ -17,8 +15,12 @@ import OrderTableScreen from '../screens/TableOrdersScreen'
 import PayOrderScreen from '../screens/PayOrderScreeen'
 import WelcomePage from '../screens/WelcomPage'
 import TestScreen from '../screens/TestScreen'
+import GoogleScreen from '../screens/GoogleOauthScreen'
 import {Router, Stack, Scene, Tabs } from 'react-native-router-flux'
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, FontAwesome } from '@expo/vector-icons';
+import HouseOrders from '../screens/HouseOrdersScreen'
+import TableViewScreen from '../screens/TableScreen'
+//import NewLoginScreen from '../new_screens/Login'
 
 import EncIcon from 'react-native-vector-icons/Entypo';
 import Icon from 'react-native-vector-icons/AntDesign'
@@ -28,18 +30,22 @@ import {colors} from '../redux/config/Config'
 
 const AppNavigator = (props) => {
     
-    const TabIcon =({focused , title, iconName}) =>{
+    const TabIcon =({focused , useFont, iconName}) =>{
         var col = focused?colors.main:'grey'
+        if (useFont){
+            return <FontAwesome name={iconName} size={32} color={col}/>
+        }
         return <Ionicons name={iconName} size={32} color={col} />;
+        
     }
     return(
 
         <Router>
-            <Scene key="root" hideNavBar={true}>
+            <Scene key="root" hideNavBar={true} swipeEnabled={false}>
                 <Scene key="welcom_page" component={WelcomePage}/>
-                {/* <Scene key="test" component={TestScreen} title="Test" hideNavBar={true}/> */}
-                <Scene key="login" initial={false} component={LoginScreen} title="Login Form"   />
-                <Scene key="register" component={RegisterScreen} title="Registration Form" />
+                {/* <Scene key="google" component={GoogleScreen} title="Test" hideNavBar={true}/> */}
+                
+                {/* <Scene key="register" component={RegisterScreen} title="Registration Form" /> */}
                 <Scene key="waiter_login" initial={false} component={LoginWaiterScreen}/>
                 <Scene key='home'  tabs  activeTintColor="#D7DB46" >
                    {/* settings tab */}
@@ -69,10 +75,10 @@ const AppNavigator = (props) => {
                 <Scene key="waiter_screens" tabs  activeTintColor="#D7DB46" hideNavBar>
                         <Scene  key="waiter_home"  title="House Tables" iconName="ios-list" icon={TabIcon} hideNavBar>
                             <Scene key = "house_tables"  component={WaiterHomeScreen}  title='Home'/>
-                            <Scene key="orders_table" component={OrderTableScreen} title="ORDERS" />
+                            <Scene key="orders_table" component={TableViewScreen} title="ORDERS" />
                         </Scene>
-                        <Scene key="waiter_tables" title="On Your List" iconName="ios-git-compare" icon={TabIcon} hideNavBar>
-                            <Scene key="waiter_tables_screen" component={WaiterTablesScreen} />
+                        <Scene key="waiter_tables" title="On Your List" iconName="spinner" useFont={true} icon={TabIcon} hideNavBar>
+                            <Scene key="waiter_tables_screen" component={HouseOrders} />
                         </Scene>
                 </Scene>
             </Scene>

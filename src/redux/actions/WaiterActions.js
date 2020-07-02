@@ -1,6 +1,20 @@
 import {url} from '../config/Config'
 
 
+export const selectTable =(table)=>{
+    return (dispatch, getState)=>{
+        const orders = table.order_set
+        dispatch({type:"SLECT_TABLE", orders:orders, table:table})
+
+    }
+}
+
+export const selectOrder = order=>{
+    return(dispatch, getState)=>{
+  
+        dispatch({type:"ORDER_SELECT_PRODUCT", products_in_order:order.selectedproduct_set, order:order})
+    }
+}
 
 export const changeOrderStatus = (id, order) =>{
     return async (dispatch, getState)=>{
@@ -16,7 +30,8 @@ export const changeOrderStatus = (id, order) =>{
                 },
                 body:JSON.stringify({
                     status:order.status,
-                    time:order.time
+                    time:order.time,
+                  
                 }),
                 
                
@@ -71,7 +86,8 @@ export const loadTables =(id)=>{
     return async (dispatch, getState)=>{
         const token = getState().auth.user.token
         dispatch({type:"LOAD_WAITER_APP"})
-        const response = await fetch(url+'/api/houses/tables/'+id,
+        // https://smart-waiter.herokuapp.com/api/orders/
+        const response = await fetch(url+'/api/orders/',
             {
                 method:"GET",
                 headers:{
@@ -95,3 +111,28 @@ export const loadTables =(id)=>{
     }
 
 } 
+
+export const get_your_orders=()=>{
+    return async(dispatch,getState)=>{
+        const token = getState().auth.user.token
+        dispatch({type:"LOAD_WAITER_APP"})
+        const response = await fetch(url+'/api/orders/waiter/',{
+            method:"GET",
+            headers:{
+                Authorization: `Token ${token}`
+            }
+        })
+
+        if (response.ok){
+           
+
+            const data = await response.json()
+            dispatch({type:"ORDERS_FOR_YOU", payload:data})
+            console.log(data)
+        }else{
+            dispatch({type:"STOP_LOADING"})
+            const data = await response.json()
+            console.log(data)
+        }
+    }
+}

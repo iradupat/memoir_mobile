@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {View, Text, Modal, FlatList, ScrollView, ActivityIndicator, Alert} from 'react-native'
-import {Header, Thumbnail, Body, Left, Right, Button, Title, Footer, Badge, List} from 'native-base'
+import {Header,Body, Left, Right, Button, Title, Footer, Badge, ListItem,Thumbnail } from 'native-base'
 import EncIcon from 'react-native-vector-icons/Entypo';
 import Icon from 'react-native-vector-icons/AntDesign'
 import {colors as Colors} from '../redux/config/Config'
@@ -8,6 +8,8 @@ import { Actions } from 'react-native-router-flux';
 import {useSelector, useDispatch } from 'react-redux'
 import {updateCurrentOrder, sentOrder} from '../redux/actions/OrderActions'
 import OrderItem from '../components/OrderItem'
+import { MaterialIcons } from '@expo/vector-icons';
+import MyModal from 'react-native-modal'
 
 const CurentOrderScreen =props=> {
     const [visibleModal, setVisibleModal] = useState(false)
@@ -107,47 +109,59 @@ const CurentOrderScreen =props=> {
         const product = real_product.find((product)=>product.id==props.item.productId) 
   
         return(
-        
-        
-            <View style={{width:'96%', borderWidth:0.5, borderColor:Colors.primary, backgroundColor:'#fff', marginVertical:10, borderRadius:30,paddingVertical:10, flexDirection:'row', justifyContent:'space-around'}}>
-                               <Thumbnail source={{uri:product.product.image}} />
-                         <View style={{width:'35%'}}>
-                               <Text style={{fontWeight:'bold', color:Colors.primary}}>
-                                        Total: {product.amount*props.item.quantity} Frw
-                               </Text>
-                               <Text style={{fontWeight:'bold', color:'grey'}}> Quantity: {props.item.quantity} </Text>
-                               <Text style={{fontWeight:'bold', color:'green'}}>Unity: {product.amount} Frw</Text>
-                        </View>
-                         <View style={{flexDirection:'row', width:'35%', justifyContent:'space-around'}}>
-                                <Button transparent onPress={()=>decreaseQuantity(props.item.productId,product.amount)}>
-                                    <EncIcon name="minus" size={30} color="red"/>
-                                </Button>
-                                <Button transparent onPress={()=>{increaseQuantity(props.item.productId, product.amount)}}>
-                                    <EncIcon name="plus" size={30} color="green"/>
-                                </Button>
+
+            <ListItem thumbnail>
+            <Left>
+              <Thumbnail square source={{uri:product.product.image}}/>
+            </Left>
+            <Body>
+                <Text style={{fontSize:16, fontWeight:'bold'}}>{product.surname}</Text>
+              <Text note numberOfLines={2}>Quantity: {props.item.quantity},  Unity: {product.amount} <Text style={{color:Colors.main, fontWeight:'bold'}}> Frw Total: {product.amount*props.item.quantity} Frw</Text> </Text>
+            </Body>
+            <Right>
+            <View style={{flexDirection:'row', justifyContent:'space-between'}}>
+                    <Button transparent onPress={()=>decreaseQuantity(props.item.productId,product.amount)}>
+                        <EncIcon name="minus" size={30} color={Colors.P}/>
+                    </Button>
+                    <Button transparent onPress={()=>{increaseQuantity(props.item.productId, product.amount)}}>
+                        <EncIcon name="plus" size={30} color={Colors.main}/>
+                    </Button>
                 </View>
+            </Right>
+          </ListItem>
+        
+            // <View style={{width:'96%', borderWidth:0.5, borderColor:Colors.primary, backgroundColor:'#fff', marginVertical:10, borderRadius:30,paddingVertical:10, flexDirection:'row', justifyContent:'space-around'}}>
+            //                    <Thumbnail source={{uri:product.product.image}} />
+            //              <View style={{width:'35%'}}>
+            //                    <Text style={{fontWeight:'bold', color:Colors.primary}}>
+            //                             Total: {product.amount*props.item.quantity} Frw
+            //                    </Text>
+            //                    <Text style={{fontWeight:'bold', color:'grey'}}> Quantity: {props.item.quantity} </Text>
+            //                    <Text style={{fontWeight:'bold', color:'green'}}>Unity: {product.amount} Frw</Text>
+            //             </View>
+                         
                                
-                </View>
+            //     </View>
         )
 
     }
   
         return (
-            <View style={{flex:1, marginTop:10}}>
-                <Header style={{backgroundColor:'#ffffff'}}>
+            <View style={{flex:1}}>
+                <Header style={{backgroundColor:'#ffffff', borderBottomEndRadius:12,borderBottomLeftRadius:12}}>
                     <Left>
                         <Button onPress={()=>Actions.pop()} transparent>
-                            <EncIcon name="chevron-left" size={27} color={Colors.primary}/>
+                            <EncIcon name="chevron-left" size={27} color={Colors.main}/>
                         </Button>
                         
                     </Left>
                     <Body>
-                        <Title style={{color:Colors.primary}}>IN THE LIST</Title>
+                        <Title style={{color:Colors.main}}>IN THE LIST</Title>
 
                     </Body>
                     <Right>
                         <Button transparent onPress={()=>{setVisibleModal(true)}}>
-                        <Text style={{color:Colors.primary, fontWeight:'bold'}}>Orders </Text>
+                        <MaterialIcons name="bookmark-border" size={29} color={Colors.main} />
                         {your_orders.length>0?
                             <Badge style={{height:17}} danger>
                                 <Text style={{fontSize:9, color:'#fff'}}>New</Text>
@@ -158,23 +172,24 @@ const CurentOrderScreen =props=> {
                     </Right>
                 </Header>
                 <View style={{flex:1}}>
-                    <View style={{width:"100%", }}>
-                     
-                        <FlatList
-                            contentContainerStyle={{alignItems:'center'}}
-                            data={DATA.products}
-                            renderItem={({item})=>{return <ItemRender item={item} />}}
-                            keyExtractor={item=>item.productId.toString()}
-                        />
-                        {DATA.products.length>0?
+                    <View style={{width:"100%", flex:1}}>
+                            
+                    {DATA.products.length>0?
                         <View style={{ alignItems:'center'}}>
-                            <Text style={{fontWeight:'bold', fontSize:17}}>Total: <Text style={{color:Colors.primary, fontWeight:'bold', fontSize:17}}>{order.sum} Frw</Text></Text>
-                            <Button disabled={isLoading?true:false} style={{width:'90%',borderColor:Colors.primary, justifyContent:'center', backgroundColor:'#fff', borderWidth:1}} onPress={sendTheOrder}>
-                                   {isLoading? <ActivityIndicator/>: <Text style={{color:Colors.primary, fontWeight:'bold'}}>SEND</Text>}
+                            <Text style={{fontWeight:'bold', fontSize:17}}>Total: <Text style={{color:Colors.main, fontWeight:'bold', fontSize:17}}>{order.sum} Frw</Text></Text>
+                            <Button disabled={isLoading?true:false} style={{width:'90%',borderColor:Colors.main, justifyContent:'center', backgroundColor:'#fff', borderWidth:1}} onPress={sendTheOrder}>
+                                   {isLoading? <ActivityIndicator/>: <Text style={{color:Colors.main, fontWeight:'bold'}}>SEND</Text>}
                             </Button>
                             
                         </View>
                         :null}
+                        <FlatList
+                            contentContainerStyle={{flexGrow:1}}
+                            data={DATA.products}
+                            renderItem={({item})=>{return <ItemRender item={item} />}}
+                            keyExtractor={item=>item.productId.toString()}
+                        />
+                        
                        
                     </View>
                     
@@ -194,21 +209,21 @@ const CurentOrderScreen =props=> {
                             </Modal>:null}
 
 
-                <Modal
-                animationType="slide "
-                visible={visibleModal}
-                transparent={false}
+                <MyModal
+                
+                isVisible={visibleModal}
+              
                 >
-                <Header style={{backgroundColor:'#D7DB46'}}>
+                <Header style={{backgroundColor:'#fff'}}>
                     <Left>
-                        {/* <Text style={{fontWeight:'bold', color:'#fff'}}>Table 456TE</Text> */}
+                       
                     </Left>
                     <Body>
-                        <Title style={{color:'#fff'}}>TODAY LIST</Title>
+                        <Title style={{color:Colors.main}}>TODAY LIST</Title>
                     </Body>
                     <Right>
                         <Button transparent onPress={()=>{setVisibleModal(false)}}>
-                            <EncIcon name="cross" size={25} color="#fff"/>
+                            <EncIcon name="cross" size={25} color={Colors.main}/>
                         </Button>
                     </Right>
                 </Header>
@@ -223,21 +238,8 @@ const CurentOrderScreen =props=> {
 
                     </View>
                     
-                    <Footer style={{backgroundColor:'#fff', borderTopColor:'gery', borderTopWidth:0.2}}>
-                        <Left>
-
-                        </Left>
-                        <Body >
-                            <Button transparent style={{width:'100%', justifyContent:'center', backgroundColor:Colors.primary}} onPress={()=>setVisibleModal(false)}>
-                                <Text style={{color:'#fff', fontWeight:'bold'}}>CLOSE</Text>
-                            </Button>
-                        </Body>
-                        <Right>
-
-                        </Right>
-                        
-                    </Footer>
-            </Modal>
+                    
+            </MyModal>
                 
             </View>
         );

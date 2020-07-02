@@ -11,9 +11,9 @@ const SettingsScreen = props =>{
     return(
         
         <View style={{width:'100%', height:'100%'}}>
-            <Header style={{backgroundColor:colors.main}}>
+            <Header style={{backgroundColor:"#fff", borderBottomLeftRadius:12, borderBottomRightRadius:12}}>
                 <Body>
-                    <Title style={{color:'#fff', fontWeight:'bold'}}>SMART WAITER</Title>
+                    <Title style={{color:colors.main, fontWeight:'bold'}}>SMART WAITER</Title>
                 </Body>
                   <Right>
 
@@ -84,7 +84,7 @@ const SettingsScreen = props =>{
               <Body/>
               <Right>
               <Button transparent style={{ width:'100%', justifyContent:'flex-end'}} onPress={()=>{
-                                                                                                    //Actions.chat_settings()
+                                                                                                    Actions.chat_settings()
                                                                                                 }}>
                 <Icon name="arrow-forward" />
                 </Button>

@@ -63,7 +63,7 @@ const MapScreen = props =>{
                // setLocation({latitude:0, longitude:0, latitudeDelta: 0.1922,longitudeDelta: 0.1421 }) 
             }
         
-    },[mylocation])
+    },[])
    
 
     let text = 'Waiting..';

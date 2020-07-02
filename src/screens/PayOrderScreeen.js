@@ -4,8 +4,8 @@ import {Button, Header, Left, Right, Icon, Body, Title} from 'native-base'
 import {getOrder, acceptOrder} from '../redux/actions/OrderActions'
 import {changeOrderStatus} from '../redux/actions/WaiterActions'
 import {useDispatch, useSelector} from 'react-redux'
-
-
+import { Actions } from 'react-native-router-flux'
+import MyModal from 'react-native-modal'
 
 
 const PayOrderScreen = props=>{
@@ -13,12 +13,15 @@ const selectedOrder = useSelector(state=>state.order.order)
 const orderId = props.id
 const dispacher = useDispatch()
 const isLoading = useSelector(state=>state.order.isLoading)
+const message = useSelector(state=>state.order.message)
 // {console.log(selectedOrder)}
+const [modal,setModal] = useState(false)
 
 const accpetOrder =()=>{
     
 }
     useEffect(()=>{
+        
         dispacher(getOrder(orderId))
     },[])
 
@@ -40,21 +43,22 @@ const accpetOrder =()=>{
                         <Right/>
                     </Header>
                     <View style={{ margin:10}}>
-                        <View style={{height:32, backgroundColor:'red', flexDirection:'row', alignItems:'center', justifyContent:'space-around'}}>
-                            <Text>{selectedOrder.house} TABLE {selectedOrder.table}</Text>
+                        <View style={{height:32,  flexDirection:'row', alignItems:'center', justifyContent:'space-around'}}>
+                            <Text style={{fontSize:18, color:'grey', fontWeight:'bold'}} >{selectedOrder.house}  {selectedOrder.table}</Text>
                         </View>
                     </View>
                     <View style={{flexDirection:'row', marginHorizontal:10, marginVertical:10}}>
-                        <View style={{width:'45%', height:15, marginHorizontal:10}}>
-                            <Text>Felix</Text>
+                        <View style={{width:'45%', height:25, marginHorizontal:10}}>
+                            <Text style={{fontSize:18}}>Felix</Text>
                         </View>
-                        <View style={{width:'45%', height:15, marginHorizontal:10}}>
-                            <Text>{selectedOrder.create_at}</Text>
+                        <View style={{width:'45%', height:25, marginHorizontal:10}}>
+                            <Text style={{fontSize:15}}>{selectedOrder.create_at}</Text>
                         </View>
                     </View>
 
                     <FlatList
                         data={selectedOrder.products}
+                        
                         keyExtractor={(item)=>item.product.product.id+""}
                         renderItem={({item})=>{
                                 return(
@@ -63,7 +67,7 @@ const accpetOrder =()=>{
                                 <Text>{item.product.product.title}</Text>
                                 </View>
                                 <View style={{width:'45%', height:15, marginHorizontal:10}}>
-                                    <Text>800 Frw</Text>
+                                    <Text>{item.product.amount} Frw</Text>
                                 </View>
                             </View>
                                 )
@@ -82,31 +86,55 @@ const accpetOrder =()=>{
                     </View>
                     <View style={{flexDirection:'row', flex:1, marginHorizontal:10}}>
                         <View style={{width:'45%', height:15, marginHorizontal:10}}>
-                            <Button style={{justifyContent:'center'}} onPress={ async ()=>{
+                            <Button style={{justifyContent:'center', backgroundColor:'#032280'}} onPress={ async ()=>{
                                 const order = {time:0, status:"S"}
                                 await dispacher(changeOrderStatus(selectedOrder.order.id, order))
-                                alert("Thanks for using Smart Waiter")
+                                //alert(message)
+                                if(message.message=="Thank you for using Smart waiter")
+                                    setModal(true)
+                                    Actions.pop()
 
                             }}>
                                 <Text style={{color:'#fff'}}>PAY CASH</Text>
                             </Button>
                         </View>
                         <View style={{width:'45%', height:15, marginHorizontal:10}}>
-                            <Button style={{justifyContent:'center', backgroundColor:'yellow'}} onPress={ async ()=>{
+                            <Button style={{justifyContent:'center', backgroundColor:'#f5cf14'}} onPress={ async ()=>{
                                     const order = {time:0, status:"S"}
                                     await dispacher(acceptOrder(selectedOrder.order.id))
-                                    alert("Thanks for using Smart Waiter okok")
+                                   // alert("Thanks for using Smart Waiter okok")
                                     let number = selectedOrder.house_phone
+                                    let new_number =""
                                     if(number.length > 10){
                                         number.substring(3)
+                                       // console.log(number)
+                                       for (let i=0 ; i<number.length;i++){
+                                            if(i>2){
+                                                new_number += number[i]
+                                            }
+                                       }
+                                        console.log(new_number)
                                     }
-                                    Linking.openURL(`tel:*182*1*1*${number}*#`)
+                                    if(message.message=="Thank you for using Smart waiter"){
+                                        await Linking.openURL(`tel:*182*1*1*${new_number}*#`)
+                                        setModal(true)
+                                        Actions.pop()
+                                    }
+                                        
                                 }}>
-                                <Text style={{color:'#000'}}>MOMO</Text>
+                                <Text style={{color:'#000'}}>MTN-MOMO</Text>
                             </Button>
                         </View>
                     </View>
-
+                                <MyModal
+                                    isVisible={modal}
+                                    swipeDirection={['down','left','right','up']}
+                                    onSwipeComplete={()=>{setModal(false)}}
+                                >
+                                        <View style={{height:'30%', backgroundColor:'#fff', borderRadius:20, justifyContent:'center', alignItems:'center'}}>
+                                            <Text>{message.message}</Text>
+                                        </View>
+                                </MyModal>
                 </View>
                 
             )}

@@ -1,19 +1,19 @@
 import React,{useEffect, useState} from 'react'
-import {Text, View, FlatList, TouchableOpacity, Modal, ActivityIndicator, Platform} from 'react-native'
+import {Text, View, FlatList, TouchableOpacity, Modal, ActivityIndicator,StyleSheet, Platform} from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
 import {useSelector,useDispatch} from 'react-redux'
 import {colors} from '../redux/config/Config'
 import {Actions} from 'react-native-router-flux'
-//orders_table
+import EvilIcons from 'react-native-vector-icons/EvilIcons'
 
 import {
     Button,Input,Item, 
     Header, Left, Body, 
     Right, Label, Title, 
-    Thumbnail
+    Badge
   } from 'native-base'
  
-import {loadTables} from '../redux/actions/WaiterActions'
+import {loadTables, selectTable as selectTableRedux} from '../redux/actions/WaiterActions'
  
 
 
@@ -21,147 +21,122 @@ const WaiterHomeScreen =props=>{
     
     const user = useSelector(state=>state.auth.user)
     const tables = useSelector(state=>state.waiter.tables)
+    const selectedOrder = useSelector(state=>state.waiter.selectedOrder)
     const isLoading = useSelector(state=>state.waiter.isLoading)
     const dispacher = useDispatch()
     const [selectedTable, setSelectedTable] = useState(null)
-    const [showModal, setShowModal] = useState(false)
-    const changeModalState =(id)=>{
-        var x;
-        var table;
-        for (x in tables){
-            if (tables[x].id === id){
-                table = tables[x]
-            }
-        }
-        setSelectedTable(table)
-        setShowModal(!showModal)
-    }
-    const MyModal =item=>{
-        return(
-            <Modal 
-              animationType="slide"
-              transparent={false}
-              visible={showModal}
-
-            >
-                <View style={{flex:1, backgroundColor:'#fff'}}>
-                    <Header transparent >
-                        <Left>
-                            <Button transparent onPress={changeModalState}>
-                                <Ionicons size={35} name="ios-close"/>
-                            </Button>
-                        </Left>
-                        <Body></Body>
-                    </Header>
-                    <View style={{flex:1}}>
-                        {/* {
-                            selectedTable == null?
-
-                            null:<DisplayOrders list={selectedTable.order_set}/>
-                        } */}
-                        
-                    </View>
-                </View>
-  
-            </Modal>
-        )
-  
-    }
-
-    const TableCard = MyItem =>{
-        var col = "red"
-        var title = ""
-        if (MyItem.order_set.length === 0){
-            col = colors.F
-            title = "NO PENDINGS"
-        }else {
-            var served = true
-            var order ;
-            for (order in MyItem.order_set){
-            
-                    if(MyItem.order_set[order].status==="P"){
-                        
-                        served = false
-                    }
-            }
-            if(served){
-                col = colors.F
-                title = "NO PENDINGS"
-            }else{
-                col = colors.P
-                title = "PENDING ORDER"
-            }
-            
-        }
-        
-        return(
-            <TouchableOpacity onPress={()=>{Actions.orders_table({"table":MyItem})}} activeOpacity={0.7} style={{alignItems:'center',width:'45%', height:90, backgroundColor:col, margin:6, borderRadius:10}}>
-                <Text style={{color:"#fff"}}>{title}</Text>
-                <View style={{flex:1,justifyContent:'center', alignItems:'center', padding:9}}>
-                    <Text style={{color:"#fff"}}>{MyItem.number}</Text>
-                    <Text style={{color:"#fff"}} numberOfLines={2}>{MyItem.description} </Text>
-                    </View>
-            </TouchableOpacity>
-            
-        )
-    }
-   const DisplayOrders=(list)=>{
-       return(
-           <FlatList
-            data={list}
-            keyExtractor = {(item)=>item.id.toString()}
-            renderItem={({item})=>{
-                    <Text>{item.status}</Text>
-            }}
-           />
-       )
-   }
-    
-
-
+    const  [refresh, setRefresh] = useState(false)
    
     useEffect(() => {
-        if(tables.length == 0){
-                dispacher(loadTables(user.waiter.house))
-        }
+       //if(tables.length == 0){
+        dispacher(loadTables(user.waiter.house))
        
+      // }       
+    },[selectedOrder])
 
-    },[])
+    const selectTable = table=>{
+        dispacher(selectTableRedux(table))
+        Actions.orders_table()
 
-if(isLoading){
-    return(
-        <View style={{flex:1, alignItems:'center', justifyContent:'center'}}>
-            <ActivityIndicator/>
-        </View>
-    )
-}
-    return(
+    }
+
+// if(isLoading){
+//     return(
+//         <View style={{flex:1, alignItems:'center', marginVertical:20}}>
+//             <ActivityIndicator/>
+//         </View>
+//     )
+// }
+return(
         <View style={{flex:1}}>
-            <Header style={{backgroundColor:colors.primary}}>
-                <Left>
-                    <Text style={{color:"#fff"}}>{user.waiter.name}</Text>
-                </Left>
+            <Header style={{backgroundColor:"#fff"}}>
+                {/* <Left>
+                    <Text style={{color:"#fff"}}></Text>
+                </Left> */}
                 <Body>
-                    <Title style={{color:'white'}}>{tables.length} TABLES</Title>
+                    <Title style={{color:colors.main, textTransform:'uppercase'}}> {user.waiter.name},  {tables.length} TABLES</Title>
                 </Body>
-                <Left>
-
-                </Left>
+                <Right>
+                    <Button transparent>
+                         <EvilIcons name="user" size={45} color={colors.main}/>
+                    </Button>
+                       
+                </Right>
             </Header>
-            <View style={{flex:1, marginLeft:'4%'}}>
+            <View style={{flex:1,}}>
                <FlatList
+            
+                contentContainerStyle={{paddingHorizontal:10}}
+                refreshing={isLoading}
+                    onRefresh={
+                        ()=>{
+                            
+                            dispacher(loadTables(user.waiter.house))
+                           
+                           
+                        }
+                    }
                     data={tables}
                     keyExtractor={(item)=>item.id+""}
                     renderItem={({item})=>{
-                        return TableCard (item)
+                        return (
+                            <TouchableOpacity activeOpacity={0.7} style={item.isAvailable?{...styles.table}:{...styles.table,backgroundColor:colors.I}} onPress={()=>{selectTable(item)}}>
+                                <View style={styles.circle}>
+                                  <Text numberOfLines={2} style={{fontWeight:'bold', fontSize:12}}>{item.number}</Text>
+                                </View>
+                                <View style={{width:'55%'}}>
+                                    <Text style={{color:'#fff'}} numberOfLines={1}>{item.description}</Text>
+                                    <Text style={{color:colors.C}}>{item.isAvailable?null:<Text>Closed Table</Text>}</Text>
+                                </View>
+                                <View style={{width:'30%'}}>
+                                    {item.order_set.length>0?
+                                         <Badge danger>
+                                         <Text style={{color:'#fff'}}>Pending</Text>
+                                       </Badge>
+                                    
+                                    :null}
+                                </View>
+                               
+                            </TouchableOpacity>
+                        )
                     }}
-                    numColumns={2}
+                   
                />
-                <MyModal />
+                
             </View>
             
         </View>
     )
 }
+
+const styles = StyleSheet.create({
+    circle:{
+        alignItems:'center',
+        justifyContent:'center',
+        width:'20%',
+        height:'80%', 
+        borderRadius:35, 
+        backgroundColor:'#fff', 
+        margin:6
+    },
+    table:{
+        width:'100%',
+        backgroundColor:colors.main, 
+        height:80, 
+        borderRadius:17,
+        marginVertical:8, 
+        flexDirection:'row', 
+        alignItems:'center',
+        shadowColor: "#000",
+        shadowOffset: {
+          width: 0,
+          height: 12,
+        },
+        shadowOpacity: 0.18,
+        shadowRadius: 16.00,
+    
+        elevation: 24,
+    }
+})
 
 export default WaiterHomeScreen

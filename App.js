@@ -1,11 +1,9 @@
 import React from 'react';
 
-import {StyleSheet, StatusBar,} from 'react-native'
+import {StyleSheet, StatusBar, Dimensions} from 'react-native'
 import { createStore, combineReducers, applyMiddleware } from 'redux';
 import { Provider } from 'react-redux';
 
-import Main from './src/Main'
-import { PersistGate } from 'redux-persist/integration/react'
 import ReduxThunk from 'redux-thunk';
 import authReducer from './src/redux/redusers/Auth'
 import AppReducer from './src/redux/redusers/AppReducer'
@@ -17,9 +15,6 @@ import WaiterReducers from './src/redux/redusers/WaiterReducers'
 import { AppLoading } from 'expo';
 import * as Font from 'expo-font';
 import { Ionicons } from '@expo/vector-icons';
-import { View } from 'native-base';
-//const persistStore = persist()
-
 
 const rootReducer = combineReducers({
   auth: authReducer,
@@ -32,10 +27,14 @@ const rootReducer = combineReducers({
 });
 const store = createStore(rootReducer, applyMiddleware(ReduxThunk));
 export default class App extends React.Component {
+
+ 
   constructor(props) {
     super(props);
     this.state = {
       isReady: false,
+      width  : Dimensions.get('window').width,
+      height :Dimensions.get('window').height
     };
   }
   async componentDidMount() {
@@ -54,24 +53,10 @@ export default class App extends React.Component {
     }
 
    return (
-  
         <Provider store={store}>
-              <StatusBar hidden />
+              <StatusBar  hidden />
              <Navigation/>
-         
-         
-      </Provider>
-
-   
-
-    
-   
-    // <Provider store={persistStore.store}>
-    //     <PersistGate loading={null} persistor={persistStore.persistor}>
-    //         <Main />
-    //     </PersistGate>
-    // </Provider>
-  
+         </Provider> 
      
    )
   

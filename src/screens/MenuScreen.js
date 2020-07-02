@@ -1,14 +1,20 @@
 import React, {useState, useEffect} from 'react'
-import {View,Text, StyleSheet, FlatList, TouchableOpacity, ActivityIndicator, Alert, Image, Modal} from 'react-native'
-import {Input, List ,Header, Item,Thumbnail ,Badge, Footer, Body , Left , Button, Right, Title, Icon as MyIcon} from 'native-base';
+import {View,Text, StyleSheet, 
+    FlatList, TouchableOpacity, Image,
+    ActivityIndicator, Alert} from 'react-native'
+import {Input, List ,Header, Item,
+    Thumbnail ,Badge, Footer, Body , 
+    Left , Button, Right, Title, 
+    Icon as MyIcon, Card, CardItem} from 'native-base';
 import EncIcon from 'react-native-vector-icons/Entypo';
 import Icon from 'react-native-vector-icons/AntDesign'
 import {useSelector,useDispatch} from 'react-redux';
 import * as AppActions from '../redux/actions/AppActions' 
 import {updateCurrentOrder,getTodayOrders} from '../redux/actions/OrderActions'
-import Card from '../components/Card'
+//import Card from '../components/Card'
 import {Actions} from 'react-native-router-flux'
 import {url, colors } from '../redux/config/Config'
+import MyModal from 'react-native-modal'
 
 
 const MenuScreen = props =>{
@@ -19,6 +25,7 @@ const MenuScreen = props =>{
     var errors = useSelector(state=> state.app.error)
     var order= useSelector(state=>state.order.currentOrder)
     var products_list = []
+    const [testModal, setTestModal] = useState(true)
 
    const addProduct = (id,amount)=>{
         const index = order.products.findIndex((e)=>e.productId===id)
@@ -101,26 +108,38 @@ const MenuScreen = props =>{
     const renderItem =(item)=>{
     
         return(
-            <View style={styles.foodContainer}>
-                  <View style={styles.productsImage}>
-                      <TouchableOpacity onPress={()=>{Actions.home_product({"product":item})}}>
-                            <Thumbnail large circle source={{ uri: item.product.image }} />
-                      </TouchableOpacity>
-                  </View>
-                  <View style={styles.description}>
-                        <Text style={{color:'grey', fontSize:17}} >{item.surname}</Text>
-                        <Text style={{color:'grey', fontSize:17}} >{item.amount} Frw</Text>
-                  </View>
-                  <View style={styles.comande}>
-                      <Button transparent onPress={()=>{addProduct(item.id, item.amount)}}>
-                            <MyIcon style={{fontSize:35, color:colors.main}} type="Ionicons" name="ios-add-circle-outline"/>
-                      </Button>
-                      <Button transparent onPress={()=>{removeProduct(item.id, item.amount)}}>
-                            <MyIcon style={{fontSize:35, color:colors.P}} type="Ionicons" name="ios-remove-circle-outline"/>
-                      </Button>
-                  </View>
-            </View>
-            
+            // <View style={styles.foodContainer}>
+
+                <Card style={{width:'48%', }}>
+                    <CardItem>
+                        <TouchableOpacity style={{flex:1}} onPress={()=>{
+                            Actions.home_product({"product":item})
+                        }}>
+                        <Body> 
+                            <Text numberOfLines={1} style={{color:'grey', fontSize:17}} >{item.surname}</Text>
+                            <Text style={{color:'red', fontSize:11}} >{item.amount} Frw</Text>
+                        </Body>
+                        </TouchableOpacity>
+                       
+                    </CardItem>
+                    <CardItem cardBody>
+                       <Image source={{uri: item.product.image}} style={{height: 200, width: null, flex: 1}} defaultSource={require('../assets/images/images.png')}/>
+                    </CardItem>
+                    <CardItem>
+                        <Left>
+                            <Button transparent onPress={()=>{addProduct(item.id, item.amount)}}>
+                                <MyIcon style={{fontSize:35, color:colors.main}} type="Ionicons" name="ios-add-circle-outline"/>
+                            </Button>
+                        </Left>
+                        <Right>
+                            <Button transparent onPress={()=>{removeProduct(item.id, item.amount)}}>
+                                <MyIcon style={{fontSize:35, color:colors.P}} type="Ionicons" name="ios-remove-circle-outline"/>
+                            </Button>
+                        </Right>
+                    </CardItem>
+                </Card>
+
+               
         )
     }
     
@@ -136,18 +155,18 @@ const MenuScreen = props =>{
     useEffect( ()=>{
         if(new_data == null){
             // check if table id is a number
-            // if(isNaN(props.table_id)){
-            //     alert("Please i don't know")
-            //     dispatcher(AppActions.reserveTable(1111))
-            // }else{
+            if(props.table_id.length>10){
+                //alert("Please i don't know")
+                dispatcher(AppActions.reserveTable(0))
+            }else{
                  dispatcher(AppActions.reserveTable(props.table_id))
             
-            // }
+            }
         }else{
             
         }
                
-    },[new_data, isLoading])
+    },[])
    if (isLoading){
        return(
         <View style={{justifyContent:'center', alignItems:'center' , marginVertical:'50%'}}><ActivityIndicator/></View>
@@ -156,16 +175,11 @@ const MenuScreen = props =>{
     return(
 
         <View style={{flex:1, }}>
-            <Header style={{backgroundColor:'#ffffff'}}>
+            <Header style={{backgroundColor:'#ffffff', borderBottomEndRadius:12, borderBottomLeftRadius:12}}>
           <View style={{width:'80%', flexDirection:'row', justifyContent:'space-around', alignItems:'center'}}>
-                <Title numberOfLines={2} style={{color:colors.main}}>{new_data.house.name} TABLE: {new_data.table.number}</Title>
+                <Title numberOfLines={2} style={{color:colors.main, textTransform:'uppercase'}}>{new_data.house.name}</Title>
           </View>
-          {/* <Left>
-              <Title style={{color:'#D7DB46'}}> {new_data.house.name}</Title>
-          </Left>
-          <Body>
-              <Title style={{color:'#D7DB46'}}>TABLE: {new_data.table.number}</Title>
-          </Body> */}
+         
           <Right>
              {/* <View style={{flexDirection:'column'}}> */}
             
@@ -189,7 +203,7 @@ const MenuScreen = props =>{
            
             <View style={styles.content} >
                     <View style={styles.serchBar}>
-                    <Item rounded>
+                    <Item style={{height:35}} rounded>
                         <MyIcon type="Ionicons" name="ios-search" />
                         <Input placeholder="Search" onChangeText={()=>{}} />
                     </Item>
@@ -198,12 +212,31 @@ const MenuScreen = props =>{
                     
                     {/* <List style={{marginHorizontal:'2%'}}> */}
                     <FlatList
+                        contentContainerStyle={{marginLeft:7, justifyContent:'space-around'}}
                         numColumns={2}
                         data={new_data.menu}
                         renderItem={({item})=>{ return renderItem(item) }}
                         keyExtractor={item => item.id+""}
                     />
                 {/* </List> */}
+                <MyModal
+                      isVisible={testModal}
+                      swipeDirection={['up', 'left', 'right', 'down']}
+                      coverScreen={false}
+                       animationOut="zoomOut"
+                       animationIn="zoomIn"
+                       animationOutTiming={1700}
+                       animationInTiming={1800}
+                      onBackdropPress={()=>{setTestModal(false)}}
+                      onSwipeComplete={()=>{setTestModal(false)}}
+                     // style={{justifyContent: 'flex-end',margin:0}}
+                      avoidKeyboard={true}
+                >
+                        <View style={{height:'30%',borderRadius:20,paddingHorizontal:12, backgroundColor:'#fff', alignItems:'center', justifyContent:'center'}}>
+                            <Text style={{fontSize:17, fontWeight:'bold'}}>Welcome To {new_data.house.name}</Text>
+                            <Text style={{fontSize:13, textAlign:'center', color:colors.main, fontWeight:'bold'}}>Welcome To {new_data.house.description}</Text>
+                        </View>
+                </MyModal>
                 
                 
                 
@@ -218,7 +251,7 @@ const MenuScreen = props =>{
  }else if(errors){
      return(
          <View>
-        <Header style={{backgroundColor:'#D7DB46'}}>
+        <Header style={{backgroundColor:colors.main, borderBottomEndRadius:12, borderBottomLeftRadius:12}}>
         
         <Body>
           <Title style={{color:'#fff'}}> SMART WAITER</Title> 
@@ -280,7 +313,7 @@ const styles = StyleSheet.create({
     foodContainer:{
         width:'47%',
         margin:5,
-        height:250,
+        height:310,
         borderRadius:8,
         borderColor:'grey',
         borderWidth:0.5,

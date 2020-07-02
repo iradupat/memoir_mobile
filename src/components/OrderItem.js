@@ -2,7 +2,7 @@ import React from 'react';
 import {View, Text} from 'react-native'
 import {List, ListItem, Left, Right, Body, Thumbnail,Button} from 'native-base'
 import {useSelector} from 'react-redux'
-
+import {colors} from '../redux/config/Config'
 
 function OrderItem(props) {
 
@@ -17,12 +17,12 @@ function OrderItem(props) {
 
     orderStatus = "PENDING"
     orderMainColor = "#fff"
-    orderTextColor = "green"
+    orderTextColor = colors.F
     message = "This order is pendind, please wait for the waiter's response"
   }else if(orderType=="C"){
     orderStatus = "CENCELED"
     orderMainColor = "#fff"
-    orderTextColor = "red"
+    orderTextColor = colors.C
     message = "The order, was canceled."
   }else if(orderType=="I"){
 
@@ -33,7 +33,7 @@ function OrderItem(props) {
     var hour = parseInt(hour) 
     orderStatus = "RECIEVED"
     orderMainColor = "#fff"
-    orderTextColor = "blue"
+    orderTextColor = colors.I
     message = <Text>This Order is in process and it is to be served in <Text style={{fontSize:17, color:'blue'}}>{hour} h : {minutes} min </Text></Text>
 
   }else if(orderType=="S"){
@@ -58,7 +58,7 @@ function OrderItem(props) {
               <Body style={{paddingRight:3,}}>
               <Text style={{color:orderTextColor}} note>ORDER N0: {props.ourItem.id}</Text>
 
-                <Text numberOfLines={3} style={{color:'grey'}} note>{message}</Text>
+                <Text numberOfLines={3} style={{color:'#fff'}} note>{message}</Text>
               </Body>
               <Right>
                    <Button transparent>

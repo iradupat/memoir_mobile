@@ -26,6 +26,7 @@ export const acceptOrder = id =>{
         })
         if(response.ok){
             const data = await response.json()
+            dispach({type:"ACCEPT_ORDER", payload:data})
             console.log(data)
         }else{
             const data = await response.json()
@@ -39,6 +40,7 @@ export const getOrder =(id)=>{
     return async (dispach, getState)=>{
         const token = getState().auth.user.token
         dispach({type:"LOADING_ORDER"})
+        //console.log("Hello 1")
         const response = await fetch(url+'/api/orders/update/'+id,
             {
                 method:"GET",
@@ -48,6 +50,7 @@ export const getOrder =(id)=>{
                 }
             }
         )
+        //console.log("Hello 2")
         if(response.ok){
             const data = await response.json()
             dispach({type:"GET_ORDER_TO_PAY", payload:data})

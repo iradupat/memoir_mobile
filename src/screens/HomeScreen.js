@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import {
   Text, View, StyleSheet, TextInput,
-  TouchableWithoutFeedback,
+  TouchableOpacity,
   Keyboard, ActivityIndicator,
-  Button as Buttons, Modal,
+  Button as Buttons, Modal,Platform , Vibration
  
 } from 'react-native';
-import {Platform} from 'expo'
+
 import { BarCodeScanner } from 'expo-barcode-scanner';
 import * as AppActions from '../redux/actions/AppActions'
 import { Actions } from 'react-native-router-flux'
@@ -24,11 +24,12 @@ import Icon from 'react-native-vector-icons/AntDesign'
 import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { Ionicons } from '@expo/vector-icons';
 import Fab from '../components/InpText'
+import MyModal from 'react-native-modal'
 
 
 
 export default function App(props) {
- 
+//  const paymentMessage = useSelector(state=>state.order.message)
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [useCode, setUseCode] = useState(false);
@@ -39,7 +40,9 @@ export default function App(props) {
   user = useSelector(state => state.auth.user)
   const [choice,setChoice] = useState("TABLE")
   var barcodeColor = scanned? colors.main :colors.P
-  var text = "Scaned..."
+  const [mytext, setMyText] = useState("Press the button and play...")
+  const headerMargin = Platform.OS== "android" ? 18 : 16 
+  const [triviaVisible, setTriviaVisible] = useState(true)
 
   function isJson(str) {
     try {
@@ -50,7 +53,23 @@ export default function App(props) {
     return true;
   }
 
-  function getOrderToPay(id){
+  const fetchTrivia = async()=>{
+    const date = new Date()
+    const day = date.getDate()
+    const month = date.getMonth()+1
+    console.log(month)
+     const respo = await fetch('http://numbersapi.com/'+month+'/'+day+'/date',{
+      method:'GET'
+    })
+    if(respo.ok){
+      console.log('hello friends')
+      const data = await respo.text()
+      setMyText(data)
+      console.log(data)
+    }else{
+      const data = await respo.text()
+      console.log(data)
+    }
 
   }
 
@@ -60,7 +79,7 @@ export default function App(props) {
 
     // } else if (scanned) {
       if(scanned){
-      return <Buttons color="#D7DB46" title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
+      return <Buttons color={colors.main} title={'Tap to Scan Again'} onPress={() => setScanned(false)} />
     }
   }
 
@@ -79,6 +98,7 @@ export default function App(props) {
 
   const handleCodeFormDisplay = () => {
     if (useCode == false) {
+     
       setUseCode(true)
 
     } else {
@@ -92,7 +112,8 @@ export default function App(props) {
   
     setScanned(true);
     setTimeout(() => {  
-
+      Vibration.vibrate(2)
+      setTriviaVisible(true)
       if (isJson(data)){
      
         console.log(data)
@@ -100,7 +121,7 @@ export default function App(props) {
         console.log(pay)
         if (pay.payment) {
           Actions.pay_screen({"id":pay.id})
-          console.log("Yes you have payed")
+         // console.log("Yes you have payed")
         
           return
         
@@ -112,7 +133,7 @@ export default function App(props) {
       //tableId = data
       Actions.home_menu({ "table_id": data })
 
-     }, 1000);
+     }, 10);
     
 
 
@@ -156,30 +177,36 @@ export default function App(props) {
         flex: 1,
         flexDirection: 'column',
         justifyContent: 'flex-end',
-        backgroundColor:'red'
+       // backgroundColor:'red'
       }}>
+       {triviaVisible? <TouchableOpacity style={{width:'100%', alignItems:'center',padding:12, backgroundColor: 'rgba(52, 52, 52, 0.5)'}} onPress={()=>{fetchTrivia()}} onLongPress={()=>{setTriviaVisible(false)}}>
+            <Text style={{fontSize:14,fontWeight:'bold', color:'#fff', textAlign:'center'}} numberOfLines={3} >{mytext}</Text>
+        </TouchableOpacity>:null}
       <BarCodeScanner
         onBarCodeScanned={scanned ? undefined : handleBarCodeScanned}
-        style={{...StyleSheet.absoluteFillObject,flex:1, backgroundColor:colors.main}}
+        style={{flex:1, marginTop: headerMargin }}
       >
-        <Header  style={{ backgroundColor: colors.main }}>
+        <Header  style={{ backgroundColor: '#fff', borderBottomRightRadius:12, borderBottomLeftRadius:12}}>
 
           <Body style={{marginLeft:'10%'}} >
-            <Title style={{ color: '#fff', fontWeight: 'bold' }}>
+            <Title style={{ color: colors.main, fontWeight: 'bold', fontFamily:'Roboto' }}>
               SMART WAITER
               </Title>
           </Body>
           <Right>
-
-            {user == null ? <EvilIcons name="user" color="#fff" size={40} /> : <Thumbnail circle source={{ uri: user.client.profile_picture == null ? "" : user.client.profile_picture }} style={{ width: 40, height: 40 }} />}
+            <Button transparent onPress={()=>{alert("Hello world")}}>
+                {user == null ? <EvilIcons name="user" color="#fff" size={40} /> : <Thumbnail circle source={{ uri: user.client.profile_picture == null ? "" : user.client.profile_picture }} style={{ width: 40, height: 40 }} />}
+            </Button>
+          
           </Right>
         </Header>
-
+        
+        
         <View style={{ justifyContent: 'center', flex: 1, alignItems: 'center' }}>
 
-
+        
           {/* {tableId == null?<View></View>:<View><Button transparent onPress={()=>{Actions.home_menu({"table_id":tableId})}}><Text style={{color:'#D7DB46'}}>GO BACK TO THE MENU</Text></Button></View>} */}
-          <View style={{ height: 230, width: 230 }}>
+          <View style={{ height: 210, width: 230 }}>
             <View style={{ flexDirection: 'row', height: '50%', width: '100%', justifyContent: 'space-between' }}>
               <View style={{ height: '94%', width: "40%", borderLeftColor: barcodeColor, borderLeftWidth: 2, borderTopColor: barcodeColor, borderTopWidth: 2, borderTopLeftRadius: 12, }}>
 
@@ -189,7 +216,12 @@ export default function App(props) {
               </View>
             </View>
             <View style={{ alignItems: 'center', width: '50%', marginHorizontal: '25%' }} elevation={20} zIndex={2}>
-              {scanned? <Text style={{fontSize:17, color:'#fff'}}>{text}</Text>:<Button onPress={() => { setUseCode(!useCode) }} transparent><Text style={{ color: "#fff", fontSize: 20 }}>Use code</Text></Button>}
+              {/* {scanned? <Button transparent onPress={()=>{ fetchTrivia() }}> 
+                          <Text style={{fontSize:17, color:'#fff'}}>Historic events</Text> 
+                        </Button> */}
+             {scanned?<Text style={{ color: "#fff", fontSize: 20 }}>Scanned</Text> :<Button onPress={() => { setUseCode(!useCode) }} transparent>
+                  <Text style={{ color: "#fff", fontSize: 20 }}>Use code</Text>
+               </Button>}
             </View>
             <View style={{ flexDirection: 'row', height: '50%', width: '100%', justifyContent: 'space-between' }}>
               <View style={{ height: '94%', width: "40%", borderLeftColor: barcodeColor, borderLeftWidth: 2, borderBottomWidth: 2, borderBottomColor: barcodeColor, borderBottomLeftRadius: 12 }}>
@@ -202,11 +234,11 @@ export default function App(props) {
           </View>
 
 
+                        
+
         </View>
-
-
-      </BarCodeScanner>
-      {gobackOrScan(scanned, tableId)}
+                      
+        {gobackOrScan(scanned, tableId)}
       {/* {scanned && <Buttons color="#D7DB46" title={'Tap to Scan Again'} onPress={() => setScanned(false)} />} */}
       <Fab active={fabState}
         fabFunc={() => { setFabState(!fabState) }} onTheMap={() => { Actions.map_settings() }}
@@ -214,27 +246,23 @@ export default function App(props) {
 
       />
 
+      </BarCodeScanner>
+     
+
       {/* The modal */}
-      <Modal
+      <MyModal
 
-        animationType="slide"
-        transparent={false}
-        visible={useCode}
-        onRequestClose={() => {
-          Alert.alert("Modal has been closed.");
-        }}
+        isVisible={useCode}
+        animationIn="bounceInUp"
+        animationInTiming={1000}
+        animationOut="zoomOutDown"
+        animationOutTiming={1000}
+        onBackdropPress={()=>{setUseCode(false)}}
       >
-        <View>
-          <Header style={{ backgroundColor: "#fff" }}>
-            <Right>
-              <Button transparent onPress={() => { setUseCode(!useCode) }}>
-                <Ionicons name="ios-close" size={27} />
-              </Button>
+        <View style={{height:'80%'}}>
+         
 
-            </Right>
-          </Header>
-
-          <View style={{ padding: 13, backgroundColor: '#fff' }}>
+          <View style={{ padding: 13, backgroundColor: '#fff', borderRadius:20 }}>
 
             <Text style={{ textAlign: 'center', color: "#D7DB46" }}>ENTER THE TABLE CODE</Text>
             <Text></Text>
@@ -246,16 +274,20 @@ export default function App(props) {
               placeholder="EX : D97C"
               selectionColor="#D7DB46"
             />
+
             <Button style={{ marginVertical: 10, width: '30%', marginHorizontal: '35%', justifyContent: 'center', backgroundColor: '#D7DB46' }} onPress={() => { useTableCode(tableCode) }}>
               <Text style={{ color: "#fff" }}>SEND</Text>
             </Button>
+            {/* <Button style={{ marginVertical: 10, width: '30%', marginHorizontal: '35%', justifyContent: 'center', backgroundColor: '#D7DB46' }} onPress={() => { trivia(tableCode) }}>
+              <Text style={{ color: "#fff" }}>TRIVIA</Text>
+            </Button> */}
 
           </View>
 
         </View>
 
 
-      </Modal>
+      </MyModal>
 
 
 
