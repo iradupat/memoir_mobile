@@ -24,8 +24,20 @@ const MenuScreen = props =>{
     var client = useSelector(state=>state.auth.user)
     var errors = useSelector(state=> state.app.error)
     var order= useSelector(state=>state.order.currentOrder)
-    var products_list = []
+    var products_list = new_data!=null? new_data.menu:[]
     const [testModal, setTestModal] = useState(true)
+    const [productname, setProductName] = useState("")
+
+    if(productname!=""){
+        products_list = products_list.filter((item,index)=>{
+
+            if(item.surname.indexOf(productname)!=-1){
+                return item
+            }
+        })
+    }else{
+        products_list = new_data.menu
+    }
 
    const addProduct = (id,amount)=>{
         const index = order.products.findIndex((e)=>e.productId===id)
@@ -153,7 +165,7 @@ const MenuScreen = props =>{
     }
 
     useEffect( ()=>{
-        if(new_data == null){
+        // if(new_data == null){
             // check if table id is a number
             if(props.table_id.length>10){
                 //alert("Please i don't know")
@@ -162,11 +174,12 @@ const MenuScreen = props =>{
                  dispatcher(AppActions.reserveTable(props.table_id))
             
             }
-        }else{
+        // }else{
             
-        }
+        // }
                
     },[])
+
    if (isLoading){
        return(
         <View style={{justifyContent:'center', alignItems:'center' , marginVertical:'50%'}}><ActivityIndicator/></View>
@@ -205,7 +218,9 @@ const MenuScreen = props =>{
                     <View style={styles.serchBar}>
                     <Item style={{height:35}} rounded>
                         <MyIcon type="Ionicons" name="ios-search" />
-                        <Input placeholder="Search" onChangeText={()=>{}} />
+                        <Input placeholder="Search" onChangeText={(text)=>{
+                                setProductName(text)
+                        }} />
                     </Item>
 
                     </View>
@@ -214,7 +229,7 @@ const MenuScreen = props =>{
                     <FlatList
                         contentContainerStyle={{marginLeft:7, justifyContent:'space-around'}}
                         numColumns={2}
-                        data={new_data.menu}
+                        data={products_list}
                         renderItem={({item})=>{ return renderItem(item) }}
                         keyExtractor={item => item.id+""}
                     />

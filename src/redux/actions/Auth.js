@@ -2,6 +2,7 @@ export const SIGNUP = 'SIGNUP';
 export const LOGIN = 'LOGIN';
 export const ERROR_AUTH = 'ERROR_AUTH'
 export const LOADING_AUTH = "LOADING_AUTH";
+export const LOGOUT = "LOGOUT";
 import {url} from '../config/Config' 
 import React from 'react'
 import {Alert} from 'react-native'
@@ -38,9 +39,11 @@ export const signup = (username,email,password) => {
           {cancelable: false},
         );
         dispatch({type: ERROR_AUTH, error:"Server error"});
-        throw new Error("erre");
+       // throw new Error("erre");
        // dispatch({error: resData.error })
+      
       })
+      return
     }
      
     const respData = await response.json()
@@ -51,6 +54,24 @@ export const signup = (username,email,password) => {
   
   };
 };
+
+export const logout = () =>{
+  return async (dispatch, getState)=>{
+    const token = getState().auth.user.token
+   
+   const response =  await fetch(url+'/api/logout',{
+      method:"POST",
+      headers:{
+        "Authorization": `Token ${token}`
+      }
+    })
+    const data = await response.json()
+    console.log(data)
+    dispatch({type:LOGOUT})
+
+  }
+
+}
 
 export const loginWaiter =(email, password) =>{
   return async (dispatch)=>{

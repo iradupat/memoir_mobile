@@ -22,9 +22,9 @@ import HouseOrders from '../screens/HouseOrdersScreen'
 import TableViewScreen from '../screens/TableScreen'
 //import NewLoginScreen from '../new_screens/Login'
 
-import EncIcon from 'react-native-vector-icons/Entypo';
-import Icon from 'react-native-vector-icons/AntDesign'
-import MatIcon from 'react-native-vector-icons/MaterialCommunityIcons'
+// import EncIcon from 'react-native-vector-icons/Entypo';
+// import Icon from 'react-native-vector-icons/AntDesign'
+// import MatIcon from 'react-native-vector-icons/MaterialCommunityIcons'
 import {colors} from '../redux/config/Config'
 
 
@@ -43,7 +43,7 @@ const AppNavigator = (props) => {
         <Router>
             <Scene key="root" hideNavBar={true} swipeEnabled={false}>
                 <Scene key="welcom_page" component={WelcomePage}/>
-                {/* <Scene key="google" component={GoogleScreen} title="Test" hideNavBar={true}/> */}
+               
                 
                 {/* <Scene key="register" component={RegisterScreen} title="Registration Form" /> */}
                 <Scene key="waiter_login" initial={false} component={LoginWaiterScreen}/>
@@ -66,7 +66,7 @@ const AppNavigator = (props) => {
                          <Scene key = "pay_screen" component={PayOrderScreen} title="PAYMENT"/>
                     </Scene>
                     {/* oreders screen */}
-                    <Scene key="orders_screen"  iconName="ios-list" title="Orders" icon={TabIcon}  >
+                    <Scene key="orders_screen"  iconName="ios-notifications" title="Orders" icon={TabIcon}  >
                          <Scene key = "orders" component={OrdersScreen} title='Orders' hideNavBar={true} />
                     </Scene>                    
 

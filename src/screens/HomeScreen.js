@@ -3,7 +3,7 @@ import {
   Text, View, StyleSheet, TextInput,
   TouchableOpacity,
   Keyboard, ActivityIndicator,
-  Button as Buttons, Modal,Platform , Vibration
+  Button as Buttons, Alert,Platform , Vibration,Image
  
 } from 'react-native';
 
@@ -12,12 +12,12 @@ import * as AppActions from '../redux/actions/AppActions'
 import { Actions } from 'react-native-router-flux'
 import { useSelector, useDispatch } from 'react-redux';
 import {
-  Button, Input, Item,
+  Button, ActionSheet, Item,
   Header, Left, Body,
-  Right, Label, Title,
+  Right, Card, CardItem, Title,
   Thumbnail
 } from 'native-base'
-
+import { Entypo } from '@expo/vector-icons';
 import {colors} from '../redux/config/Config'
 import EncIcon from 'react-native-vector-icons/Entypo';
 import Icon from 'react-native-vector-icons/AntDesign'
@@ -25,7 +25,7 @@ import EvilIcons from 'react-native-vector-icons/EvilIcons'
 import { Ionicons } from '@expo/vector-icons';
 import Fab from '../components/InpText'
 import MyModal from 'react-native-modal'
-
+import * as AuthActions from '../redux/actions/Auth'
 
 
 export default function App(props) {
@@ -33,16 +33,19 @@ export default function App(props) {
   const [hasPermission, setHasPermission] = useState(null);
   const [scanned, setScanned] = useState(false);
   const [useCode, setUseCode] = useState(false);
-  var user = null
+  //var user = null
   var tableId = useSelector(state => state.app.table)
   const [fabState, setFabState] = useState(false)
   const [tableCode, setTableCode] = useState(0)
-  user = useSelector(state => state.auth.user)
+  const user = useSelector(state => state.auth.user)
   const [choice,setChoice] = useState("TABLE")
   var barcodeColor = scanned? colors.main :colors.P
   const [mytext, setMyText] = useState("Press the button and play...")
   const headerMargin = Platform.OS== "android" ? 18 : 16 
   const [triviaVisible, setTriviaVisible] = useState(true)
+  const [paying,setPaying] = useState(false)
+  const [welcome, setwelcome] = useState(false)
+  const dispacher = useDispatch()
 
   function isJson(str) {
     try {
@@ -107,7 +110,10 @@ export default function App(props) {
   }
 
   
-  
+  const manuarlyPay = (id)=>{
+    handleCodeFormDisplay()
+    Actions.pay_screen({"id":id})
+  }
   const handleBarCodeScanned = ({ type, data }) => {
   
     setScanned(true);
@@ -137,7 +143,7 @@ export default function App(props) {
     
 
 
-    // alert(`Bar code with type ${type} and data ${data} has been scanned!`);
+     //alert(`Bar code with type ${type} and data ${data} has been scanned!`);
   };
 
   if (hasPermission === null) {
@@ -194,7 +200,29 @@ export default function App(props) {
               </Title>
           </Body>
           <Right>
-            <Button transparent onPress={()=>{alert("Hello world")}}>
+            <Button transparent onPress={()=>{
+
+                    Alert.alert(
+                      'Alert',
+                      'Do you want to logout!',
+                      [
+                        
+                        {
+                          text: 'Cancel',
+                          onPress: () => {
+                            
+                          },
+                          style: 'cancel'
+                        },
+                        { text: 'OK', onPress: () => {
+                          Actions.pop()
+                          dispacher(AuthActions.logout())
+                        } }
+                      ],
+                      { cancelable: false }
+                    );
+                
+            }}>
                 {user == null ? <EvilIcons name="user" color="#fff" size={40} /> : <Thumbnail circle source={{ uri: user.client.profile_picture == null ? "" : user.client.profile_picture }} style={{ width: 40, height: 40 }} />}
             </Button>
           
@@ -220,7 +248,7 @@ export default function App(props) {
                           <Text style={{fontSize:17, color:'#fff'}}>Historic events</Text> 
                         </Button> */}
              {scanned?<Text style={{ color: "#fff", fontSize: 20 }}>Scanned</Text> :<Button onPress={() => { setUseCode(!useCode) }} transparent>
-                  <Text style={{ color: "#fff", fontSize: 20 }}>Use code</Text>
+                  <Text style={{ color: "#fff", fontSize: 20 }}>Use codes</Text>
                </Button>}
             </View>
             <View style={{ flexDirection: 'row', height: '50%', width: '100%', justifyContent: 'space-between' }}>
@@ -264,16 +292,19 @@ export default function App(props) {
 
           <View style={{ padding: 13, backgroundColor: '#fff', borderRadius:20 }}>
 
-            <Text style={{ textAlign: 'center', color: "#D7DB46" }}>ENTER THE TABLE CODE</Text>
+            <Text style={{ textAlign: 'center', color: "#D7DB46" }}>ENTER THE TABLE CODE/ORDER NUMBER</Text>
             <Text></Text>
             <TextInput
               clearTextOnFocus={true}
-              style={{ borderWidth: 1, padding: 10, borderRadius: 12, height: 50, borderColor: "#D7DB46" }}
+              style={{ borderWidth: 1, padding: 10, borderRadius: 12, height: 50, borderColor: colors.main }}
               onChangeText={(val) => { setTableCode(val) }}
               maxLength={20}
               placeholder="EX : D97C"
               selectionColor="#D7DB46"
             />
+            <Button style={{ marginVertical: 10, width: '30%', marginHorizontal: '35%', justifyContent: 'center', backgroundColor: '#D7DB46' }} onPress={() => { manuarlyPay(tableCode) }}>
+              <Text style={{ color: "#fff" }}>PAY</Text>
+            </Button>
 
             <Button style={{ marginVertical: 10, width: '30%', marginHorizontal: '35%', justifyContent: 'center', backgroundColor: '#D7DB46' }} onPress={() => { useTableCode(tableCode) }}>
               <Text style={{ color: "#fff" }}>SEND</Text>
@@ -288,7 +319,44 @@ export default function App(props) {
 
 
       </MyModal>
+{/* payment modal */}
+            <MyModal 
+            isVisible={welcome}
+            animationIn="bounceIn"
+            animationInTiming={1000}
+            animationOut="zoomOutDown"
+            animationOutTiming={1000}
+            onSwipeComplete={()=>{setTestModal(false)}}
+            swipeDirection={["down"]}
+            onBackdropPress={()=>{setwelcome(false)}}
+            >
+              <View style={{width:'100%', backgroundColor:'#fff', borderTopEndRadius:12, borderTopStartRadius:12}}>
+                  <View style={{height:450, backgroundColor:'#fff'}}>
+                      <View style={{height:'55%', alignItems:'center'}}>
+                          <Image source={require('../assets/images/ok.gif')} style={{width:'100%', height:'100%'}}/>
+                      </View>
+                      <View style={{flex:1, margin:3}}>
+                        <Card style={{flex:1, borderRadius:10}}>
+                          <CardItem style={{alignItems:"center",  justifyContent:'center'}} >
+                                <Title style={{color:"#000"}}>Welcome {user.client.display_name}</Title>
+                               
+                          </CardItem>
+                          <CardItem>
+                          <Text style={{textAlign:'center', fontSize:16}}> Scan the code on the table and get the restaurant menu.</Text>
+                          </CardItem>
+                          <CardItem style={{justifyContent:'center'}}>
+                            <Button onPress={()=>{setwelcome(false)}} style={{justifyContent:'center', width:'100%', backgroundColor:colors.main}}>
+                              <Text style={{fontSize:20, color:'#fff'}}>ok</Text>
+                            </Button>
+                          </CardItem>
+                        </Card>
 
+                      </View>
+                  </View>
+              </View>
+
+            </MyModal>
+           
 
 
     </View>
